@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="javascripts/material-design-lite/material.min.css">
+    <script src="javascripts/material-design-lite/material.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body>
+
+<div class="mdl-grid" id="users">
+    <div class="mdl-cell"></div>
+    <div class="mdl-cell"></div>
+    <div class="mdl-cell"></div>
+    <div class="mdl-cell--8-col-desktop mdl-cell--5-offset-desktop">
+        <form action="#">
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="display: block;">
+                <input class="mdl-textfield__input" type="text" id="name">
+                <label class="mdl-textfield__label" for="name">搜索</label>
+            </div>
+        </form>
+    </div>
+    <dialogtemplate :show.sync="show">
+        <header slot="title">
+            这是头部
+        </header>
+        <div slot="body">
+            这是身体
+        </div>
+        <footer slot="footer">
+            这是脚部
+        </footer>
+    </dialogtemplate>
+
+</div>
+<template id="dialog-tmp">
+    <div class="mdl-dialog">
+        <div class="mdl-dialog__content" :class="{'hidden':show}">
+            <slot name="title"></slot>
+            <slot name="body"></slot>
+            <slot name="footer"></slot>
+        </div>
+    </div>
+</template>
+
+    <script src="javascripts/Vue/vue.js"></script>
+    <script>
+
+        Vue.component('dialogtemplate',{
+            template:'#dialog-tmp',
+            props:['show'],
+            methods:{
+                close: function () {
+                    this.show = false;
+                }
+            }
+        })
+
+        new Vue({
+            el:'#users',
+            data:{
+                show:false
+            },
+            methods:{
+                openDialog: function () {
+                    this.show = true
+                },
+                closeDialog: function () {
+                    this.show = false
+                }
+            },
+            computed:{
+            },
+        })
+    </script>
+</body>
+</html>

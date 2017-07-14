@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="javascripts/material-design-lite/material.min.css">
+    <script src="javascripts/material-design-lite/material.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body>
+
+<div id="app">
+    <parenttmp></parenttmp>
+</div>
+
+    <template id="parenttmp">
+        <div>
+            <childcomponent-1></childcomponent-1>
+            <childcomponent-2></childcomponent-2>
+            <button @click="showMsg">显示消息</button>
+        </div>
+    </template>
+    <template id="childcomponent-1">
+        <h2>this is child1 inner text</h2>
+    </template>
+    <template id="childcomponent-2">
+        <h2>this is child2 inner text</h2>
+    </template>
+
+    <div id="eventCounterApp">
+        <p>{{counter}}</p>
+        <buttontmp v-on:increment="parentAdd"></buttontmp>
+        <buttontmp v-on:increment="parentAdd"></buttontmp>
+    </div>
+<template id="buttontmp">
+    <button @click="incrementChild">{{childCounter}}</button>
+</template>
+
+    <script src="javascripts/Vue/vue.js"></script>
+    <script>
+
+        Vue.component('parenttmp',{
+            template:'#parenttmp',
+            components:{
+                'childcomponent-1':{
+                    template:'#childcomponent-1',
+                    data: function () {
+                        return {
+                            msg:'this is childcomponent-1'
+                        }
+                    }
+                },
+                'childcomponent-2':{
+                    template:'#childcomponent-2',
+                    data: function () {
+                        return {
+                            msg:'this is childcomponent-2'
+                        }
+                    }
+                }
+            },
+            methods:{
+                showMsg: function () {
+                    this.$children.forEach(function (item) {
+                        console.log(item.msg)
+                    })
+                }
+            }
+        })
+
+        new Vue({
+            el:'#app',
+        })
+
+        new Vue({
+            el:'#eventCounterApp',
+            data:{
+              counter:0
+            },
+            components:{
+                'buttontmp':{
+                    template:'#buttontmp',
+                    data: function () {
+                        return {
+                            childCounter:0
+                        }
+                    },
+                    methods:{
+                        incrementChild: function () {
+                            this.childCounter+=1;
+                            this.$emit('increment')
+                        }
+                    }
+                }
+            },
+            methods:{
+                parentAdd: function () {
+                    this.counter+=1
+                }
+            }
+        })
+
+    </script>
+</body>
+</html>

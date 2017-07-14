@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        *{
+            font-family: simhei, Helvetica, Arial, sans-serif;
+        }
+        .openbtn{
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            font-size: 16pt;
+            transform: translate(-50%,-50%);
+        }
+
+        button{
+            background-color: #cb4a70;
+            padding:0 1.5em;
+            border: 1px solid #ca4970;
+            border-radius: .1em;
+            color: #fff;
+            line-height: 3em;
+            outline: 0;
+            transition: .3s ease-out;
+        }
+
+        button:hover,button:focus{
+            background-color: white;
+            color: #cb4a70;
+            cursor: pointer;
+            transition: .3s ease-in;
+        }
+        .dialog{
+            position: absolute;
+            left: 50%;
+            top: 30%;
+            transform: translate(-50%,-50%);
+            width: 480px;
+            border-radius: .2em;
+            z-index: 99;
+            visibility: hidden;
+            background-color: white;
+        }
+        .dialogoverlay{
+            position: absolute;
+            left: 0;
+            top: 0;
+            background-color: rgba(0,0,0,.5);
+            width: 100%;
+            height: 100%;
+            visibility: hidden;
+            opacity:0;
+            transition: all .6s;
+        }
+        .active{
+            visibility: visible;
+        }
+        .active~ .dialogoverlay{
+            opacity: 1;
+            visibility: visible;
+        }
+        .close{
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            position: absolute;
+            top: .5rem;
+            right: .5rem;
+            color: #ffffff;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+        .close:hover{
+            transform: rotate(360deg);
+            -moz-transform: rotate(360deg);
+            -webkit-transform: rotate(360deg);
+            transition: 1.0s ease all;
+        }
+        .close .fa-close{
+            font-size: 2rem;
+        }
+        .dialog_header{
+            background-color: #cb4a70;
+        }
+        .dialog_title{
+            line-height: 2.5em;
+            text-align: center;
+            color: white;
+            font-weight: 600;
+            margin:0;
+        }
+        .dialog_body{
+            background-color: white;
+            height: 9em;
+            padding: 8px;
+            text-align: center;
+        }
+        .dialog_footer{
+            background-color: white;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+            padding: 8px;
+            margin: 0 2em;
+        }
+    </style>
+    <script src="javascripts/Vue/vue.js"></script>
+    <script src="javascripts/vuex/dist/vuex.js"></script>
+    <link rel="stylesheet" href="http://apps.bdimg.com/libs/fontawesome/4.4.0/css/font-awesome.min.css">
+</head>
+<body>
+<div id="app">
+    <div>
+        <button class="btn openbtn" @click="openDialog">打开dialog</button>
+    </div>
+
+    <dialog-template>
+        <header slot="header" class="dialog_header">
+            <h2  class="dialog_title">title</h2>
+        </header>
+        <div class="dialog_body" slot="body">
+            <p>这是弹出框体</p>
+            <p>提示内容在这里写。</p>
+        </div>
+        <footer class="dialog_footer" slot="footer">
+            <button @click="closedialog">关闭</button>
+        </footer>
+    </dialog-template>
+</div>
+    <template id="dialogtmp">
+        <div>
+            <div class="dialog" :class="{'active':show}">
+                <div class="dialogcontent">
+                    <div class="close" @click="closedialog">
+                        <i class="fa fa-close"></i>
+                    </div>
+                    <slot name="header"></slot>
+                    <slot name="body"></slot>
+                    <slot name="footer"></slot>
+                </div>
+            </div>
+            <div class="dialogoverlay"></div>
+        </div>
+    </template>
+    <script>
+        const store = new Vuex.Store({
+            state:{
+                show:false
+            },
+            mutations:{
+                closedialog(state){
+                    console.log('close')
+                    state.show = false
+                },
+                opendialog(state){
+                    console.log('open')
+                    state.show = true
+                }
+            }
+        })
+        Vue.component('dialog-template',{
+            template:'#dialogtmp',
+            computed:{
+              show:function(){
+                  return store.state.show;
+              }
+            },
+            methods:{
+                closedialog: function () {
+                    console.log('component close')
+                    store.commit('closedialog')
+                }
+            }
+        })
+
+
+        new Vue({
+            el:'#app',
+            computed:{
+                show(){
+                    return store.state.show;
+                }
+            },
+            methods:{
+                openDialog: function () {
+                    console.log('parent open')
+                    store.commit('opendialog');
+                },
+                closedialog: function () {
+                    store.commit('closedialog')
+                }
+            }
+        })
+    </script>
+</body>
+</html>

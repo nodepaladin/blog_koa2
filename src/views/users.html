@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="javascripts/material-design-lite/material.min.css">
+    <script src="javascripts/material-design-lite/material.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body>
+
+<div class="mdl-grid" id="users">
+    <div class="mdl-cell"></div>
+    <div class="mdl-cell"></div>
+    <div class="mdl-cell"></div>
+    <div class="mdl-cell--8-col-desktop mdl-cell--5-offset-desktop">
+        <form action="#">
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="display: block;">
+                <input class="mdl-textfield__input" type="text" id="name" v-model="User.name">
+                <label class="mdl-textfield__label" for="name">姓名</label>
+            </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="display: block;">
+                <input class="mdl-textfield__input" type="text" id="age" v-model="User.age">
+                <label class="mdl-textfield__label" for="age">年龄</label>
+            </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="display: block;">
+                <input class="mdl-textfield__input" type="text" id="gender" v-model="User.phone">
+                <label class="mdl-textfield__label" for="gender">性别</label>
+            </div>
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" @click="addUser()">
+                添加
+            </button>
+        </form>
+    </div>
+    <div class="mdl-cell--8-col-desktop mdl-cell--2-offset-desktop" style="margin-top: 16px;">
+        <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width: 100%;">
+            <thead>
+            <tr>
+                <th class="mdl-data-table__cell--non-numeric">姓名</th>
+                <th>年龄</th>
+                <th>性别</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="(user,index) in users">
+                <td class="mdl-data-table__cell--non-numeric">{{user.name}}</td>
+                <td>{{user.age}}</td>
+                <td>{{user.phone}}</td>
+                <td>
+                    <!-- Accent-colored raised button -->
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" @click="deleteUser(user._id)">
+                        删除
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+    <script src="javascripts/Vue/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.3.3"></script>
+    <script>
+
+        new Vue({
+            el:'#users',
+            mounted: function () {
+              this.getUsers()
+            },
+            data:{
+                User:{
+                  name:'',
+                  age:0,
+                  phone:''
+                },
+                ids:[],
+                users:[],
+                url:'http://localhost:3000/users'
+            },
+            methods:{
+                addUser: function () {
+                    let that = this;
+                    console.log('addUser')
+                    if (this.User.name==''||this.User.gender=='') return
+                    this.$http.post(that.url+'/saveUser',that.User).then(result=>{
+                        that.getUsers();
+                    },err=>{
+
+                    })
+                },
+                getUsers: function () {
+                    var that = this;
+                    that.$http.get(that.url+'/getUsers').then(result=>{
+                        console.log(JSON.stringify(result))
+                        that.users = result.body
+                    },err=>{
+                        alert('获取users出错了')
+                    })
+                },
+                deleteUser: function (id) {
+                    var that = this;
+                    that.$http.post(that.url+'/deleteUser',{id:id}).then(result=>{
+                        console.log(JSON.stringify(result))
+                        that.getUsers();
+                    },err=>{
+                        alert('删除user出错了')
+                    })
+                }
+            }
+        })
+    </script>
+</body>
+</html>

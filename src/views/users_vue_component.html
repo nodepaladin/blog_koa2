@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="javascripts/material-design-lite/material.min.css">
+    <script src="javascripts/material-design-lite/material.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body>
+
+<div class="mdl-grid" id="users">
+    <div class="mdl-cell"></div>
+    <div class="mdl-cell"></div>
+    <div class="mdl-cell"></div>
+    <div class="mdl-cell--8-col-desktop mdl-cell--5-offset-desktop">
+        <form action="#">
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="display: block;">
+                <input class="mdl-textfield__input" type="text" id="name" v-model="searchtext">
+                <label class="mdl-textfield__label" for="name">搜索</label>
+            </div>
+        </form>
+    </div>
+    <my-tmp v-bind:cols="gridColumns" v-bind:gridData="gridData"></my-tmp>
+
+    <template id="grid-tmp">
+        <div class="mdl-cell--8-col-desktop mdl-cell--2-offset-desktop" style="margin-top: 16px;">
+            <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp mdl-data-table--selectable" style="width: 100%;">
+                <thead>
+                <tr>
+                    <th v-for="(col,index) in cols" :class="{mdl-data-table--selectable:index==0}">{{col}}</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </template>
+
+</div>
+
+
+    <script src="javascripts/Vue/vue.js"></script>
+    <script>
+
+        Vue.component('my-tmp',{
+            template:'#grid-tmp',
+            props:['cols','gridData']
+        })
+
+        new Vue({
+            el:'#users',
+            data:{
+                gridColumns:['姓名','年龄','性别'],
+                gridData:[
+                    {name:'李华',age:18,gender:'male'},
+                    {name:'小明',age:17,gender:'female'},
+                    {name:'小刚',age:26,gender:'male'},
+                    {name:'皮皮',age:2,gender:'unknown'}
+                ],
+                searchtext:''
+            },
+            methods:{
+            },
+            computed:{
+            }
+        })
+    </script>
+</body>
+</html>
