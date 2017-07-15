@@ -7,6 +7,8 @@ const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 const mongo = require('mongoose')
 const request = require('request')
+const crypto = require('crypto')
+const querystring = require('querystring')
 const WXAccessToken = require('./app/model/WXAccessToken')
 const wxtransfer = require('./app/middleware/wxtransfer')
 const config = require('./config/config')
@@ -37,6 +39,31 @@ app.use(views(__dirname + '/src/views', {
   extension: 'html',
   //   map:{html:'swig'}
 }))
+//if wx
+app.use(async (ctx,next)=>{
+    if (ctx.method==='POST'){
+        const url = ctx.request.url
+        const params = querystring.parse(url.split('?')[1])
+        const signature = params.signature;
+        const timestamp = params.timestamp;
+        const nonce = params.nonce;
+        if (!signature||!timestamp||!nonce){
+            //不是微信请求
+            ctx.body = '小样，你是谁'
+            return
+        }
+        var sortArr = [config.wxconfig.token,timestamp,nonce].sort()
+        var hash = crypto.createHash('sha1')
+        var str = hash.update(sortArr.join(''))
+        var sha1str = str.digest('hex');
+        if (sha1str!==signature){
+            console.log('不是微信请求')
+            return
+        }
+    }
+    await next()
+})
+//transfer xml to req body
 app.use(wxtransfer())
 // logger
 app.use(async (ctx, next) => {
@@ -50,7 +77,7 @@ app.use(async (ctx, next) => {
 app.use(index.routes(), index.allowedMethods())
 app.use(users.routes(), users.allowedMethods())
 
-getWX_AccessToken()
+// getWX_AccessToken()
 
 function getWX_AccessToken() {
     request.get('https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid='+config.wxconfig.APPID+'&secret='+config.wxconfig.APPSECRET, function (err, result) {
@@ -71,6 +98,7 @@ function getWX_AccessToken() {
             if (tokens.length==0){
                 const updateTime = new Date()
                 wxAccessToken.updateTime = updateTime
+                tokenBean.expires_in = expires_in
                 wxAccessToken.save(function (err) {
                     if (err){
                         throw err
@@ -80,21 +108,23 @@ function getWX_AccessToken() {
             }else {
                 var tokenBean = tokens[0]
                 console.log(new Date().getTime()-tokenBean.updateTime.getTime())
-                // if (new Date().getTime()-tokenBean.updateTime.getTime())
-                tokenBean.access_token = access_token
-                tokenBean.save(function (err) {
-                    if (err){
-                        throw err
-                    }
-                    console.log('update access_token success')
-                })
+                // if (new Date().getTime()-tokenBean.updateTime.getTime()>1000*60*90){
+                    tokenBean.access_token = access_token
+                    tokenBean.expires_in = expires_in
+                    tokenBean.save(function (err) {
+                        if (err){
+                            throw err
+                        }
+                        console.log('update access_token success')
+                    })
+                // }
             }
         })
     })
 }
 
 app.on('error', (err, ctx) =>
-    log.error('server error', err, ctx)
+    console.log(err)
 );
 
 module.exports = app

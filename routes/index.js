@@ -2,6 +2,7 @@ const router = require('koa-router')()
 const crypto = require('crypto')
 const querystring = require('querystring')
 const token = 'token_donz'
+const xml2js = require('xml2js')
 const wxtransfer = require('../app/middleware/wxtransfer')
 
 router.get('/', async (ctx, next) => {
@@ -37,27 +38,23 @@ router.get('/wx_api',async (ctx,next)=>{
 })
 
 router.post('/wx_api',async (ctx,next)=>{
-    const url = ctx.request.url
-    const params = querystring.parse(url.split('?')[1])
-    console.log(JSON.stringify(params))
-    const signature = params.signature;
-    const timestamp = params.timestamp;
-    const nonce = params.nonce;
-    if (!signature||!timestamp||!nonce){
-        //不是微信请求
-        ctx.body = '小样，你是谁'
-        return
-    }
-    var sortArr = [token,timestamp,nonce].sort()
-    var hash = crypto.createHash('sha1')
-    var str = hash.update(sortArr.join(''))
-    var sha1str = str.digest('hex');
-    if (sha1str!==signature){
-        return
-    }
     //执行业务逻辑
     //格式化解析消息
     //自动回复
+    const message = ctx.req.body;
+    // ctx.body = 'success'
+    if (message.MsgType==='text'){
+         var xmlBuilder = new xml2js.Builder({cdata:true})
+        var replyxml = xmlBuilder.buildObject({xml:{
+            ToUserName: message.FromUserName,
+            FromUserName:message.ToUserName,
+            CreateTime:Date.now(),
+            MsgType: message.MsgType,
+            Content:message.Content,
+        }})
+        console.log('replyxml is ->>>'+replyxml)
+        ctx.body = replyxml
+    }
 })
 
 router.get('/users', async (ctx,next)=>{

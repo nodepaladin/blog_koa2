@@ -8,6 +8,9 @@ module.exports = {
     },
     wxconfig:{
         APPID:'wxd60e21a8c36c364c',
-        APPSECRET:'712034428f3f52213c99bcf059a356ea'
+        // APPID:'wxd70e860cac264248',
+        // APPSECRET:'21c0eab392af644264885ff0ca5d1f32',
+        APPSECRET:'712034428f3f52213c99bcf059a356ea',
+        token:'token_donz'
     }
 }
