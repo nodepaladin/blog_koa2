@@ -7,9 +7,11 @@ const wxtransfer = require('../app/middleware/wxtransfer')
 
 router.get('/', async (ctx, next) => {
   ctx.set('Access-Control-Allow-Origin','*');
-  await ctx.render('index', {
-    title: 'Hello Koa 2!'
-  })
+  ctx.set('Access-Control-Allow-Methods','PUT, GET, POST, DELETE, HEAD, PATCH')
+  // await ctx.render('index', {
+  //   title: 'Hello Koa 2!'
+  // })
+    ctx.body = 'this is resopnse'
 })
 //GET request
 router.get('/wx_api',async (ctx,next)=>{

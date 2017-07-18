@@ -12,6 +12,7 @@ const querystring = require('querystring')
 const WXAccessToken = require('./app/model/WXAccessToken')
 const wxtransfer = require('./app/middleware/wxtransfer')
 const config = require('./config/config')
+var cors = require('cors')
 const db = mongo.connection
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
@@ -20,6 +21,47 @@ db.once('open', function() {
 });
 mongo.connect(require('./config/config').mongodb.connction);
 
+const server = require('http').createServer();
+const io = require('socket.io')(server, {
+    serveClient: false,
+    // below are engine.IO options
+    pingInterval: 10000,
+    pingTimeout: 5000,
+    cookie: false,
+});
+var chatUsers = []
+io.on('connection', function (socket) {
+    socket.on('message', function (obj) {
+        console.log('广播消息-》'+JSON.stringify(obj))
+        for (let i = 0; i < chatUsers.length; i++) {
+            var user = chatUsers[i];
+            if (socket.id==user.id){
+                obj.username = user.name
+            }
+        }
+        io.emit('msg',obj)
+    })
+    socket.on('reg', function (obj) {
+        console.log('注册消息-》'+obj)
+        chatUsers.push({name:obj.name,id:socket.id})
+        socket.broadcast.emit('msg',{name:obj.name,id:socket.id,join:'加入了聊天室'})
+        io.emit('userList',chatUsers)
+    })
+    socket.on('disconnect', function () {
+        console.log('disconnect->'+socket.id)
+        for (let i = 0; i < chatUsers.length; i++) {
+            var user = chatUsers[i];
+            if (socket.id==user.id){
+                chatUsers.splice(i,1)
+                socket.broadcast.emit('msg',{name:user.name,id:socket.id,join:'离开了聊天室'})
+                socket.broadcast.emit('userList',chatUsers)
+            }
+        }
+    })
+    // socket.broadcast.emit('join',chatUsers)
+    console.log('socket connected...&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+})
+server.listen(8979);
 
 const index = require('./routes/index')
 const users = require('./routes/users')
@@ -39,6 +81,7 @@ app.use(views(__dirname + '/src/views', {
   extension: 'html',
   //   map:{html:'swig'}
 }))
+// app.use(cors())
 //if wx
 app.use(async (ctx,next)=>{
     if (ctx.method==='POST'){
